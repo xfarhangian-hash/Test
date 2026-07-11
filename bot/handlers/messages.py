@@ -1,30 +1,37 @@
+import logging
+
 from telegram import Update
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
+from bot.config import get_settings
+from bot.services.forwarder import forward_to_admin, is_admin, register_admin
 
-async def echo_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    text = update.message.text
-    await update.message.reply_text(
-        f"پیام شما:\n\n{text}\n\n"
-        "برای دیدن دستورات از /help استفاده کنید."
-    )
+logger = logging.getLogger(__name__)
 
 
-async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    photo = update.message.photo[-1]
-    await update.message.reply_text(
-        f"📷 عکس دریافت شد!\n"
-        f"ابعاد: {photo.width}×{photo.height} پیکسل"
-    )
+async def handle_incoming_message(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    settings = get_settings()
+    user = update.effective_user
 
+    if is_admin(user, settings):
+        register_admin(update, context)
+        return
 
-async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("😊 استیکر قشنگی بود!")
+    if not forwarded:
+        message = update.effective_message
+        if message:
+            await message.reply_text(
+                "پیام شما دریافت شد، اما فعلاً امکان ارسال به مدیر وجود ندارد.\n"
+                "لطفاً بعداً دوباره تلاش کنید."
+            )
+        return
+
+    message = update.effective_message
+    if message:
+        await message.reply_text("✅ پیام شما دریافت شد و به مدیر ارسال شد.")
 
 
 def register_message_handlers(application: Application) -> None:
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, echo_text)
-    )
-    application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-    application.add_handler(MessageHandler(filters.Sticker.ALL, handle_sticker))
+    application.add_handler(MessageHandler(filters.ALL, handle_incoming_message))

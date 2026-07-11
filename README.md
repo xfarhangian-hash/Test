@@ -1,71 +1,65 @@
-# ربات تلگرام
+# ربات تلگرام — فوروارد پیام به مدیر
 
-یک ربات تلگرام ساده با Python و کتابخانه [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot).
+رباتی که **هر پیام دریافتی** را همراه با اطلاعات فرستنده به حساب تلگرام مدیر (`@MohsenFarhangian`) ارسال می‌کند.
 
-## قابلیت‌ها
+## نحوه کار
 
-- دستورات `/start`، `/help`، `/time`، `/about`، `/profile`
-- دکمه‌های تعاملی (Inline Keyboard)
-- پاسخ به پیام‌های متنی، عکس و استیکر
-- رابط کاربری فارسی
+1. کاربر پیامی (متن، عکس، فایل، استیکر و ...) به ربات می‌فرستد
+2. ربات اطلاعات فرستنده را برای مدیر ارسال می‌کند
+3. پیام اصلی به حساب مدیر **فوروارد** می‌شود
 
 ## پیش‌نیازها
 
-- Python 3.10 یا بالاتر
-- یک توکن ربات از [@BotFather](https://t.me/BotFather)
+- Python 3.10+
+- توکن ربات از [@BotFather](https://t.me/BotFather)
+- حساب مدیر: [@MohsenFarhangian](https://t.me/MohsenFarhangian)
 
-## نصب و راه‌اندازی
-
-### ۱. ساخت ربات در تلگرام
-
-1. در تلگرام به [@BotFather](https://t.me/BotFather) بروید
-2. دستور `/newbot` را بزنید
-3. نام و username ربات را انتخاب کنید
-4. توکن دریافتی را کپی کنید
-
-### ۲. نصب وابستگی‌ها
+## نصب
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate   # در ویندوز: .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### ۳. تنظیم توکن
-
-```bash
 cp .env.example .env
 ```
 
-فایل `.env` را باز کنید و توکن را جایگزین کنید:
+فایل `.env` را ویرایش کنید:
 
 ```
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...
+TELEGRAM_BOT_TOKEN=توکن_ربات
+ADMIN_USERNAME=MohsenFarhangian
 ```
 
-### ۴. اجرای ربات
+## راه‌اندازی مدیر
+
+> **مهم:** ربات نمی‌تواند مستقیماً با username پیام بفرستد؛ به `chat_id` عددی نیاز دارد.
+
+**روش ۱ (ساده):** یک‌بار با حساب `@MohsenFarhangian` به ربات `/start` بزنید. شناسه چت شما خودکار ثبت می‌شود.
+
+**روش ۲ (پایدار):** شناسه عددی را در `.env` قرار دهید:
+
+```
+ADMIN_CHAT_ID=123456789
+```
+
+شناسه را از [@userinfobot](https://t.me/userinfobot) یا دستور `/myid` دریافت کنید.
+
+## اجرا
 
 ```bash
 python -m bot.main
 ```
 
-ربات را در تلگرام پیدا کنید و `/start` بزنید.
-
-## ساختار پروژه
+## ساختار
 
 ```
 bot/
-├── main.py              # نقطه ورود
-├── config.py            # تنظیمات و env
+├── main.py
+├── config.py
+├── services/
+│   └── forwarder.py    # منطق فوروارد به مدیر
 └── handlers/
-    ├── commands.py      # دستورات (/start, /help, ...)
-    ├── callbacks.py     # دکمه‌های inline
-    └── messages.py      # پیام‌های متنی، عکس، استیکر
+    ├── commands.py
+    └── messages.py
 ```
-
-## توسعه
-
-برای افزودن دستور جدید، یک handler در `bot/handlers/commands.py` بسازید و آن را در `register_command_handlers` ثبت کنید.
 
 ## مجوز
 

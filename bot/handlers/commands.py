@@ -1,59 +1,62 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+
+from bot.config import get_settings
+from bot.services.forwarder import get_admin_chat_id, is_admin, register_admin
 
 WELCOME_TEXT = (
     "سلام {name}! 👋\n\n"
-    "به ربات تلگرام خوش آمدید.\n"
-    "از دکمه‌های زیر یا دستور /help استفاده کنید."
+    "پیام‌های شما به مدیر ارسال می‌شود.\n"
+    "هر متن، عکس، فایل یا استیکری که بفرستید، "
+    "مستقیماً به حساب @{admin} ارسال می‌شود."
+)
+
+ADMIN_WELCOME_TEXT = (
+    "سلام {name}! 👋\n\n"
+    "شما به‌عنوان مدیر (@{admin}) ثبت شدید.\n"
+    "از این پس تمام پیام‌های کاربران به این حساب ارسال می‌شود.\n\n"
+    "شناسه چت شما: `{chat_id}`"
 )
 
 HELP_TEXT = (
-    "📋 **راهنمای دستورات**\n\n"
-    "/start — شروع و خوش‌آمدگویی\n"
+    "📋 **راهنما**\n\n"
+    "هر پیامی که به این ربات بفرستید، "
+    "همراه با اطلاعات فرستنده به مدیر ارسال می‌شود.\n\n"
+    "دستورات:\n"
+    "/start — شروع\n"
     "/help — نمایش این راهنما\n"
-    "/time — زمان فعلی (تهران)\n"
-    "/about — درباره ربات\n"
-    "/profile — اطلاعات پروفایل شما\n\n"
-    "همچنین می‌توانید هر پیامی بفرستید تا پاسخ بگیرم."
+    "/myid — نمایش شناسه چت شما (فقط مدیر)"
 )
 
 ABOUT_TEXT = (
     "🤖 **درباره ربات**\n\n"
-    "این یک ربات تلگرام نمونه است که با Python و "
-    "کتابخانه python-telegram-bot ساخته شده.\n\n"
-    "قابلیت‌ها:\n"
-    "• پاسخ به دستورات\n"
-    "• دکمه‌های تعاملی\n"
-    "• پاسخ به پیام‌های متنی\n"
-    "• نمایش اطلاعات کاربر"
+    "این ربات پیام‌های دریافتی را به حساب "
+    "تلگرام مدیر (@{admin}) فوروارد می‌کند."
 )
 
 
-def _main_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("⏰ زمان", callback_data="time"),
-                InlineKeyboardButton("👤 پروفایل", callback_data="profile"),
-            ],
-            [
-                InlineKeyboardButton("📋 راهنما", callback_data="help"),
-                InlineKeyboardButton("ℹ️ درباره", callback_data="about"),
-            ],
-        ]
-    )
-
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    settings = get_settings()
     user = update.effective_user
     name = user.first_name if user else "دوست من"
 
+    if is_admin(user, settings):
+        register_admin(update, context)
+        await update.message.reply_text(
+            ADMIN_WELCOME_TEXT.format(
+                name=name,
+                admin=settings.admin_username,
+                chat_id=update.effective_chat.id,
+            ),
+            parse_mode="Markdown",
+        )
+        return
+
     await update.message.reply_text(
-        WELCOME_TEXT.format(name=name),
-        reply_markup=_main_keyboard(),
+        WELCOME_TEXT.format(name=name, admin=settings.admin_username)
     )
 
 
@@ -62,34 +65,32 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(ABOUT_TEXT, parse_mode="Markdown")
+    settings = get_settings()
+    await update.message.reply_text(
+        ABOUT_TEXT.format(admin=settings.admin_username),
+        parse_mode="Markdown",
+    )
 
 
-async def time_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    now = datetime.now(ZoneInfo("Asia/Tehran"))
-    text = f"🕐 زمان فعلی تهران:\n`{now.strftime('%Y/%m/%d — %H:%M:%S')}`"
-    await update.message.reply_text(text, parse_mode="Markdown")
-
-
-async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    settings = get_settings()
     user = update.effective_user
-    if not user:
-        await update.message.reply_text("اطلاعات کاربر در دسترس نیست.")
+
+    if not is_admin(user, settings):
+        await update.message.reply_text("این دستور فقط برای مدیر در دسترس است.")
         return
 
-    username = f"@{user.username}" if user.username else "—"
-    text = (
-        "👤 **پروفایل شما**\n\n"
-        f"• نام: {user.full_name}\n"
-        f"• نام کاربری: {username}\n"
-        f"• شناسه: `{user.id}`"
+    register_admin(update, context)
+    admin_chat_id = get_admin_chat_id(context, settings)
+    await update.message.reply_text(
+        f"شناسه چت شما: `{admin_chat_id}`\n"
+        f"نام کاربری مدیر: @{settings.admin_username}",
+        parse_mode="Markdown",
     )
-    await update.message.reply_text(text, parse_mode="Markdown")
 
 
 def register_command_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about))
-    application.add_handler(CommandHandler("time", time_command))
-    application.add_handler(CommandHandler("profile", profile))
+    application.add_handler(CommandHandler("myid", myid))
