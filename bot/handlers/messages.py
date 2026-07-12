@@ -18,6 +18,17 @@ async def handle_incoming_message(
 
     if is_admin(user, settings):
         register_admin(update, context)
+        message = update.effective_message
+        if message:
+            text = message.text or ""
+            if not text.startswith("/"):
+                await message.reply_text(
+                    rtl(
+                        f"شما مدیر (@{settings.admin_username}) هستید.\n"
+                        "پیام‌های شما فوروارد نمی‌شوند.\n\n"
+                        "برای تست: با یک اکانت دیگر (نه این حساب) به ربات پیام بدهید."
+                    )
+                )
         return
 
     forwarded = await forward_to_admin(update, context, settings)

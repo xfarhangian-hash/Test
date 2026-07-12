@@ -23,6 +23,8 @@ def get_admin_chat_id(context: ContextTypes.DEFAULT_TYPE, settings: Settings) ->
 
 def register_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_chat.id
+    if context.bot_data.get("admin_chat_id") == chat_id:
+        return
     context.bot_data["admin_chat_id"] = chat_id
     logger.info("Admin chat_id registered: %s", chat_id)
 
@@ -60,4 +62,7 @@ async def forward_to_admin(
         text=_sender_info(update),
     )
     await message.forward(chat_id=admin_chat_id)
+    user = update.effective_user
+    username = f"@{user.username}" if user and user.username else str(user.id if user else "?")
+    logger.info("Message forwarded to admin from %s", username)
     return True
