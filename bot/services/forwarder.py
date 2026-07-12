@@ -3,13 +3,16 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from bot.services.reply_store import link_message
 from bot.config import Settings
 from bot.utils.rtl import rtl
 
 logger = logging.getLogger(__name__)
 
 
-def is_admin(user, settings: Settings) -> bool:
+def is_admin(user, settings: Settings, chat_id: int | None = None) -> bool:
+    if chat_id and settings.admin_chat_id and chat_id == settings.admin_chat_id:
+        return True
     if not user or not user.username:
         return False
     return user.username.lower() == settings.admin_username.lower()
@@ -39,7 +42,8 @@ def _sender_info(update: Update) -> str:
         "📩 پیام جدید\n\n"
         f"• نام: {user.full_name}\n"
         f"• نام کاربری: {username}\n"
-        f"• شناسه: {user.id}"
+        f"• شناسه: {user.id}\n\n"
+        "↩️ برای پاسخ: Reply روی این پیام یا پیام فوروارد شده بزنید."
     )
 
 
@@ -57,11 +61,16 @@ async def forward_to_admin(
     if not message:
         return False
 
-    await context.bot.send_message(
+    user_chat_id = update.effective_chat.id
+
+    info_msg = await context.bot.send_message(
         chat_id=admin_chat_id,
         text=_sender_info(update),
     )
-    await message.forward(chat_id=admin_chat_id)
+    forwarded_msg = await message.forward(chat_id=admin_chat_id)
+
+    link_message(admin_chat_id, info_msg.message_id, user_chat_id)
+    link_message(admin_chat_id, forwarded_msg.message_id, user_chat_id)
     user = update.effective_user
     username = f"@{user.username}" if user and user.username else str(user.id if user else "?")
     logger.info("Message forwarded to admin from %s", username)

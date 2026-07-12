@@ -15,18 +15,20 @@ WELCOME_TEXT = rtl(
 ADMIN_WELCOME_TEXT = rtl(
     "سلام {name}! 👋\n\n"
     "شما به‌عنوان مدیر (@{admin}) ثبت شدید.\n"
-    "از این پس تمام پیام‌های کاربران به این حساب ارسال می‌شود.\n\n"
+    "پیام کاربران به شما فوروارد می‌شود.\n\n"
+    "برای پاسخ: روی پیام کاربر Reply بزنید.\n"
+    "پاسخ شما (متن، عکس، فایل...) به همان کاربر ارسال می‌شود.\n\n"
     "شناسه چت شما: {chat_id}"
 )
 
 HELP_TEXT = rtl(
     "📋 راهنما\n\n"
-    "هر پیامی که به این ربات بفرستید، "
-    "همراه با اطلاعات فرستنده به مدیر ارسال می‌شود.\n\n"
+    "کاربران: هر پیامی بفرستید تا به مدیر برسد.\n\n"
+    "مدیر: روی پیام فوروارد شده Reply بزنید تا پاسخ به کاربر برسد.\n\n"
     "دستورات:\n"
     "/start — شروع\n"
     "/help — نمایش این راهنما\n"
-    "/myid — نمایش شناسه چت شما (فقط مدیر)"
+    "/myid — شناسه چت (فقط مدیر)"
 )
 
 ABOUT_TEXT = rtl(
@@ -41,7 +43,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     name = user.first_name if user else "دوست من"
 
-    if is_admin(user, settings):
+    if is_admin(user, settings, update.effective_chat.id):
         register_admin(update, context)
         await update.message.reply_text(
             ADMIN_WELCOME_TEXT.format(
@@ -72,7 +74,7 @@ async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     settings = get_settings()
     user = update.effective_user
 
-    if not is_admin(user, settings):
+    if not is_admin(user, settings, update.effective_chat.id):
         await update.message.reply_text(
             rtl("این دستور فقط برای مدیر در دسترس است.")
         )
