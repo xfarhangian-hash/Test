@@ -2,11 +2,13 @@ import asyncio
 import logging
 import sys
 
+from telegram.error import Conflict
 from telegram.ext import Application
 from telegram.request import HTTPXRequest
 
 from bot.config import get_settings
 from bot.handlers import register_handlers
+from bot.utils.rtl import rtl
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -23,10 +25,26 @@ def _ensure_event_loop() -> None:
         asyncio.set_event_loop(asyncio.new_event_loop())
 
 
-def main() -> None:
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+def _configure_event_loop() -> None:
     _ensure_event_loop()
+    if sys.platform == "win32" and sys.version_info < (3, 14):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+async def _error_handler(update, context) -> None:
+    if isinstance(context.error, Conflict):
+        logging.error(
+            rtl(
+                "یک نمونه دیگر از ربات هم‌زمان در حال اجراست. "
+                "همه پنجره‌های قبلی را ببندید و فقط یک بار اجرا کنید."
+            )
+        )
+        return
+    logging.exception("Unhandled error while processing update", exc_info=context.error)
+
+
+def main() -> None:
+    _configure_event_loop()
     settings = get_settings()
 
     async def post_init(application: Application) -> None:
@@ -53,6 +71,7 @@ def main() -> None:
         builder = builder.proxy(settings.proxy).get_updates_proxy(settings.proxy)
 
     application = builder.build()
+    application.add_error_handler(_error_handler)
     register_handlers(application)
 
     logging.info("ربات در حال اجراست...")
