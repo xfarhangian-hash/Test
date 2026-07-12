@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.config import Settings
+from bot.utils.rtl import rtl
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,10 @@ def register_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def _sender_info(update: Update) -> str:
     user = update.effective_user
     if not user:
-        return "📩 پیام جدید از کاربر ناشناس"
+        return rtl("📩 پیام جدید از کاربر ناشناس")
 
     username = f"@{user.username}" if user.username else "بدون username"
-    return (
+    return rtl(
         "📩 پیام جدید\n\n"
         f"• نام: {user.full_name}\n"
         f"• نام کاربری: {username}\n"

@@ -1,28 +1,26 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from bot.config import get_settings
 from bot.services.forwarder import get_admin_chat_id, is_admin, register_admin
+from bot.utils.rtl import rtl
 
-WELCOME_TEXT = (
+WELCOME_TEXT = rtl(
     "سلام {name}! 👋\n\n"
     "پیام‌های شما به مدیر ارسال می‌شود.\n"
     "هر متن، عکس، فایل یا استیکری که بفرستید، "
     "مستقیماً به حساب @{admin} ارسال می‌شود."
 )
 
-ADMIN_WELCOME_TEXT = (
+ADMIN_WELCOME_TEXT = rtl(
     "سلام {name}! 👋\n\n"
     "شما به‌عنوان مدیر (@{admin}) ثبت شدید.\n"
     "از این پس تمام پیام‌های کاربران به این حساب ارسال می‌شود.\n\n"
-    "شناسه چت شما: `{chat_id}`"
+    "شناسه چت شما: {chat_id}"
 )
 
-HELP_TEXT = (
-    "📋 **راهنما**\n\n"
+HELP_TEXT = rtl(
+    "📋 راهنما\n\n"
     "هر پیامی که به این ربات بفرستید، "
     "همراه با اطلاعات فرستنده به مدیر ارسال می‌شود.\n\n"
     "دستورات:\n"
@@ -31,8 +29,8 @@ HELP_TEXT = (
     "/myid — نمایش شناسه چت شما (فقط مدیر)"
 )
 
-ABOUT_TEXT = (
-    "🤖 **درباره ربات**\n\n"
+ABOUT_TEXT = rtl(
+    "🤖 درباره ربات\n\n"
     "این ربات پیام‌های دریافتی را به حساب "
     "تلگرام مدیر (@{admin}) فوروارد می‌کند."
 )
@@ -51,7 +49,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 admin=settings.admin_username,
                 chat_id=update.effective_chat.id,
             ),
-            parse_mode="Markdown",
         )
         return
 
@@ -61,14 +58,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(HELP_TEXT, parse_mode="Markdown")
+    await update.message.reply_text(HELP_TEXT)
 
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     settings = get_settings()
     await update.message.reply_text(
         ABOUT_TEXT.format(admin=settings.admin_username),
-        parse_mode="Markdown",
     )
 
 
@@ -77,15 +73,18 @@ async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
 
     if not is_admin(user, settings):
-        await update.message.reply_text("این دستور فقط برای مدیر در دسترس است.")
+        await update.message.reply_text(
+            rtl("این دستور فقط برای مدیر در دسترس است.")
+        )
         return
 
     register_admin(update, context)
     admin_chat_id = get_admin_chat_id(context, settings)
     await update.message.reply_text(
-        f"شناسه چت شما: `{admin_chat_id}`\n"
-        f"نام کاربری مدیر: @{settings.admin_username}",
-        parse_mode="Markdown",
+        rtl(
+            f"شناسه چت شما: {admin_chat_id}\n"
+            f"نام کاربری مدیر: @{settings.admin_username}"
+        ),
     )
 
 
