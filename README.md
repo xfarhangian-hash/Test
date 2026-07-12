@@ -1,10 +1,8 @@
-# Sql-Server
+# Telegram Bot
 
-SQL Server scripts and utilities.
+ربات تلگرام برای فوروارد پیام کاربران به مدیر و پاسخ‌دهی توسط ادمین.
 
-## Telegram Bot
-
-ربات تلگرام (فوروارد پیام + پاسخ مدیر) در پوشه [`telegram-bot/`](telegram-bot/) قرار دارد.
+## نصب
 
 ```bash
 cd telegram-bot
