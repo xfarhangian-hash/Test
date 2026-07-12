@@ -31,7 +31,17 @@ async def handle_incoming_message(
                 )
         return
 
-    forwarded = await forward_to_admin(update, context, settings)
+    try:
+        forwarded = await forward_to_admin(update, context, settings)
+    except Exception:
+        logger.exception("Failed to forward message to admin")
+        message = update.effective_message
+        if message:
+            await message.reply_text(
+                rtl("خطا در ارسال پیام به مدیر. لطفاً بعداً دوباره تلاش کنید.")
+            )
+        return
+
     if not forwarded:
         message = update.effective_message
         if message:
