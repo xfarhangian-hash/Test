@@ -3,6 +3,7 @@ import logging
 import sys
 
 from telegram.ext import Application
+from telegram.request import HTTPXRequest
 
 from bot.config import get_settings
 from bot.handlers import register_handlers
@@ -32,15 +33,35 @@ def main() -> None:
         if settings.admin_chat_id:
             application.bot_data["admin_chat_id"] = settings.admin_chat_id
 
-    application = (
+    request = HTTPXRequest(
+        connect_timeout=settings.connect_timeout,
+        read_timeout=settings.read_timeout,
+        write_timeout=settings.read_timeout,
+        pool_timeout=settings.connect_timeout,
+    )
+
+    builder = (
         Application.builder()
         .token(settings.token)
+        .request(request)
+        .get_updates_request(request)
         .post_init(post_init)
-        .build()
     )
+
+    if settings.proxy:
+        logging.info("Using proxy: %s", settings.proxy)
+        builder = builder.proxy(settings.proxy).get_updates_proxy(settings.proxy)
+
+    application = builder.build()
     register_handlers(application)
 
     logging.info("ربات در حال اجراست...")
+    if settings.proxy:
+        logging.info("اتصال از طریق پروکسی: %s", settings.proxy)
+    else:
+        logging.info(
+            "اگر خطای TimedOut گرفتید، VPN را روشن کنید یا TELEGRAM_PROXY را در .env تنظیم کنید."
+        )
     application.run_polling(allowed_updates=["message", "edited_message"])
 
 
