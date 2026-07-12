@@ -23,7 +23,7 @@ def get_settings() -> Settings:
         )
 
     admin_username = os.getenv("ADMIN_USERNAME", "MohsenFarhangian").strip().lstrip("@")
-    admin_chat_id_raw = os.getenv("ADMIN_CHAT_ID", "").strip()
+    admin_chat_id_raw = os.getenv("ADMIN_CHAT_ID", "1755704405").strip()
     admin_chat_id = int(admin_chat_id_raw) if admin_chat_id_raw else None
 
     return Settings(
