@@ -1,0 +1,13 @@
+{
+  "serverUrl": "https://azure.okco.ir",
+  "collection": "Ofoq Kourosh",
+  "project": "ImprovementOfInfrastructure",
+  "assignedTo": "Farhangian.Mohsen@okco.ir",
+  "iterationPath": "ImprovementOfInfrastructure\\sprint 8-1405",
+  "parentStateFilter": "Radius",
+  "parentWorkItemType": "Product Backlog Item",
+  "childWorkItemType": "Task",
+  "parentIds": [
+    58200
+  ]
+}
