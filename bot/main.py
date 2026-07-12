@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import warnings
 
 from telegram.error import Conflict
 from telegram.ext import Application
@@ -8,6 +9,7 @@ from telegram.request import HTTPXRequest
 
 from bot.config import get_settings
 from bot.handlers import register_handlers
+from bot.single_instance import ensure_single_instance
 from bot.utils.rtl import rtl
 
 logging.basicConfig(
@@ -15,6 +17,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="asyncio")
 
 
 def _ensure_event_loop() -> None:
@@ -44,10 +47,12 @@ async def _error_handler(update, context) -> None:
 
 
 def main() -> None:
+    ensure_single_instance()
     _configure_event_loop()
     settings = get_settings()
 
     async def post_init(application: Application) -> None:
+        await application.bot.delete_webhook(drop_pending_updates=True)
         if settings.admin_chat_id:
             application.bot_data["admin_chat_id"] = settings.admin_chat_id
 
