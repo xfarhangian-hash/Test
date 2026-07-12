@@ -48,8 +48,8 @@ def ensure_single_instance() -> None:
 
         if _pid_running(existing_pid):
             raise RuntimeError(
-                "ربات قبلاً در حال اجراست.\n"
-                "همه پنجره‌های قبلی را ببندید یا Task Manager را بررسی کنید."
+                "Bot is already running.\n"
+                "Close other windows or check Task Manager."
             )
         LOCK_PATH.unlink(missing_ok=True)
 

@@ -10,7 +10,6 @@ from telegram.request import HTTPXRequest
 from bot.config import get_settings
 from bot.handlers import register_handlers
 from bot.single_instance import ensure_single_instance
-from bot.utils.rtl import rtl
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -37,10 +36,8 @@ def _configure_event_loop() -> None:
 async def _error_handler(update, context) -> None:
     if isinstance(context.error, Conflict):
         logging.error(
-            rtl(
-                "یک نمونه دیگر از ربات هم‌زمان در حال اجراست. "
-                "همه پنجره‌های قبلی را ببندید و فقط یک بار اجرا کنید."
-            )
+            "Another bot instance is already running. "
+            "Close other windows and start only one instance."
         )
         return
     logging.exception("Unhandled error while processing update", exc_info=context.error)
@@ -79,12 +76,12 @@ def main() -> None:
     application.add_error_handler(_error_handler)
     register_handlers(application)
 
-    logging.info("ربات در حال اجراست...")
+    logging.info("Bot is running...")
     if settings.proxy:
-        logging.info("اتصال از طریق پروکسی: %s", settings.proxy)
+        logging.info("Using proxy: %s", settings.proxy)
     else:
         logging.info(
-            "اگر خطای TimedOut گرفتید، VPN را روشن کنید یا TELEGRAM_PROXY را در .env تنظیم کنید."
+            "If you get TimedOut errors, enable VPN or set TELEGRAM_PROXY in .env."
         )
     application.run_polling(allowed_updates=["message", "edited_message"])
 
