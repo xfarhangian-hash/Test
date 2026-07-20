@@ -1,6 +1,6 @@
-# SQL Server HA — Windows Auth as OKCO\Farhangain.Mohsen
+# SQL Server HA — Windows Auth as OKCO\Farhangian.Mohsen
 #
-# NTLM as OKCO\Farhangain.Mohsen:
+# NTLM as OKCO\Farhangian.Mohsen:
 #   Set MSSQL_PASSWORD in .cursor/mcp.json (or Cursor MCP UI). Never commit the real password.
 # SSPI on domain-joined Windows (same login session):
 #   Remove user/domain from authentication, install msnodesqlv8, keep type: windows.
@@ -14,7 +14,7 @@ connections:
     authentication:
       type: windows
       domain: OKCO
-      user: Farhangain.Mohsen
+      user: Farhangian.Mohsen
     trustServerCertificate: true
     security:
       mode: readonly
@@ -26,7 +26,7 @@ connections:
     authentication:
       type: windows
       domain: OKCO
-      user: Farhangain.Mohsen
+      user: Farhangian.Mohsen
     trustServerCertificate: true
     security:
       mode: readonly
