@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mssql-ha": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@tugberkgunver/mcp-sqlserver",
+        "--config",
+        "mssql-mcp.yaml"
+      ],
+      "env": {
+        "MSSQL_USER": "Farhangain.Mohsen",
+        "MSSQL_PASSWORD": "REPLACE_WITH_WINDOWS_PASSWORD"
+      }
+    }
+  }
+}

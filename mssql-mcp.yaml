@@ -1,0 +1,41 @@
+# SQL Server HA — Windows Auth as OKCO\Farhangain.Mohsen
+#
+# NTLM as OKCO\Farhangain.Mohsen:
+#   Set MSSQL_PASSWORD in .cursor/mcp.json (or Cursor MCP UI). Never commit the real password.
+# SSPI on domain-joined Windows (same login session):
+#   Remove user/domain from authentication, install msnodesqlv8, keep type: windows.
+
+defaultServer: g545
+
+connections:
+  g545:
+    host: gig-dc1-g545
+    database: master
+    authentication:
+      type: windows
+      domain: OKCO
+      user: Farhangain.Mohsen
+    trustServerCertificate: true
+    security:
+      mode: readonly
+      maxRowCount: 500
+
+  p451:
+    host: GIG-DC1-P451\NODE
+    database: master
+    authentication:
+      type: windows
+      domain: OKCO
+      user: Farhangain.Mohsen
+    trustServerCertificate: true
+    security:
+      mode: readonly
+      maxRowCount: 500
+
+security:
+  mode: readonly
+  maxRowCount: 500
+  blockedKeywords:
+    - xp_cmdshell
+    - SHUTDOWN
+    - DROP DATABASE
