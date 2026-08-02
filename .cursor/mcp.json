@@ -1,12 +1,10 @@
 {
   "mcpServers": {
     "mssql-ha": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
-        "-y",
-        "@tugberkgunver/mcp-sqlserver",
-        "--config",
-        "mssql-mcp.yaml"
+        "/c",
+        "windows\\start-mssql-mcp.cmd"
       ],
       "env": {
         "MSSQL_USER": "Farhangian.Mohsen",

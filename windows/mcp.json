@@ -1,13 +1,8 @@
 {
   "mcpServers": {
     "mssql-ha": {
-      "command": "C:\\Program Files\\nodejs\\npx.cmd",
-      "args": [
-        "-y",
-        "@tugberkgunver/mcp-sqlserver",
-        "--config",
-        "C:\\Users\\farhangian.mohsen\\Desktop\\Git\\Test\\mssql-mcp.yaml"
-      ],
+      "command": "REPLACE_WITH_ABSOLUTE_PATH\\windows\\start-mssql-mcp.cmd",
+      "args": [],
       "env": {
         "MSSQL_USER": "Farhangian.Mohsen",
         "MSSQL_PASSWORD": "PUT_PASSWORD_HERE"
