@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "mssql-ha": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@tugberkgunver/mcp-sqlserver",
+        "--config",
+        "C:\\Users\\farhangian.mohsen\\Desktop\\Git\\Test\\mssql-mcp.yaml"
+      ],
+      "env": {
+        "MSSQL_USER": "Farhangian.Mohsen",
+        "MSSQL_PASSWORD": "PUT_PASSWORD_HERE"
+      }
+    }
+  }
+}

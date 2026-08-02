@@ -1,0 +1,6 @@
+# Local secrets — never commit real Windows/SQL passwords
+.env
+.env.*
+!.env.example
+mssql-mcp.local.yaml
+.cursor/mcp.local.json

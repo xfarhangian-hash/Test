@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mssql-ha": {
+      "command": "REPLACE_WITH_ABSOLUTE_PATH\\windows\\start-mssql-mcp.cmd",
+      "args": [],
+      "env": {
+        "MSSQL_USER": "Farhangian.Mohsen",
+        "MSSQL_PASSWORD": "PUT_PASSWORD_HERE"
+      }
+    }
+  }
+}
